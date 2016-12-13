@@ -205,8 +205,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       __onAppLocalStorageChanged: function(event) {
         if (event.detail === this ||
-            event.detail.key !== this.key ||
-            event.detail.storage !== this.storage) {
+            event.detail.key !== this.key) {
           return;
         }
         this.syncToMemory(function() {
@@ -215,10 +214,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       __parseValueFromStorage: function() {
+        var item = this.storage.getItem(this.key);
         try {
-          return JSON.parse(this.storage.getItem(this.key));
+          if (item === 'undefined') {
+            if (this.sessionOnly) {
+              return JSON.parse(window.localStorage.getItem(this.key));
+            } else {
+              return JSON.parse(window.sessionStorage.getItem(this.key));
+            }
+          } else {
+            return JSON.parse(item);
+          }
         } catch(e) {
-          console.error('Failed to parse value from storage for', this.key);
+            console.error('Failed to parse value from local storage for', this.key);
         }
       },
 
